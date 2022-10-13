@@ -53,7 +53,7 @@ class position:
 class board:
     board = []
     def __init__(self):
-        self.board = [[block(1,1,0,0,0),block(1,0,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,0),block(0,0,1,0,0),block(0,0,1,1,2)]]
+        self.board = [[block(1,1,0,1,0),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
 
     def printBoard(self):
         for y in range(len(self.board[0])):
@@ -74,12 +74,11 @@ class board:
 
     # Direction -1 left, 1 right
     # Direction up -1 down, 1 up
+
     def search(self, startpos, direction=position(0, 0), startSteps = 0, positionsExploredInput = []):
-        print(f"start pos:({startpos}), direction:({direction})")
-        print("block info:", self.board[startpos.x][startpos.y])
-        pos = startpos
-        positionsExplored = positionsExploredInput
-        # X
+        pos = position(startpos.x, startpos.y)
+        positionsExplored = positionsExploredInput[:]
+
         canContinue = True
         didMove = False
         steps = startSteps
@@ -88,87 +87,59 @@ class board:
             if direction.x == 1 and not self.board[pos.x][pos.y].rightBlocked():
                 pos.x += 1
                 didMove = True
-                print("x++")
             elif direction.x == -1 and not self.board[pos.x][pos.y].leftBlocked():
                 pos.x -= 1
                 didMove = True
-                print("x--")
             # Y
             elif direction.y == 1 and not self.board[pos.x][pos.y].bottomBlocked():
                 pos.y += 1
                 didMove = True
-                print("y++")
             elif direction.y == -1 and not self.board[pos.x][pos.y].topBlocked():
                 pos.y -= 1
                 didMove = True
-                print("y--")
             else:
                 canContinue = False
-                print("Board stop:", self.board[pos.x][pos.y].left, self.board[pos.x][pos.y].top, self.board[pos.x][pos.y].right, self.board[pos.x][pos.y].bottom)
-                print("pos(x,y), steps:",pos.x, pos.y, steps)
         
         # First run
         if direction.x == 0 and direction.y == 0:
-            print("First run")
+            positionsExplored.append(pos)
         else:
             if didMove:
                 steps += 1
-            # elif not didMove and pos.x == startpos.x and pos.y == startpos.y and steps != 0:
-            #     return steps
 
+            for epos in positionsExplored:
+                if epos.equals(pos):
+                    return 99999
+            
             alreadyAdded = False
-            for pos in positionsExplored:
-                if pos.equals(startpos):
+            for epos in positionsExplored:
+                if epos.equals(pos):
                     alreadyAdded = True
             if not alreadyAdded:
-                positionsExplored.append(startpos)
-            print("positions:", positionsExplored)
-            
-            for epos in positionsExplored:
-                if epos.equals(pos) and steps != 0:
-                    print("Dead end")
-                    return 99999
+                positionsExplored.append(pos)
 
             if self.board[pos.x][pos.y].isTarget():
-                print("found it")
-                input("Press Enter to continue...")
                 return steps
 
-            #input("Press Enter to continue...")
-
         totalSteps = 99999
-        print("direction:", direction.x, direction.y)
-        print("-------------------------------------------------")
-        input("Press Enter to continue...")
+
         if direction.x != 1:
-            print("Right")
             rightSteps = self.search(pos,position(1,0),steps, positionsExplored)
-            print("rightsteps:", rightSteps)
             if totalSteps > rightSteps:
                 totalSteps = rightSteps
         if direction.x != -1:
-            print("Left")
             leftSteps = self.search(pos,position(-1,0),steps, positionsExplored)
-            print("leftsteps:", leftSteps)
             if totalSteps > leftSteps:
                 totalSteps = leftSteps
         if direction.y != 1:
-            print("Bottom")
             bottomSteps = self.search(pos,position(0,1),steps, positionsExplored)
-            print("bottomsteps:", bottomSteps)
             if totalSteps > bottomSteps:
                 totalSteps = bottomSteps
         if direction.y != -1:
-            print("Top")
             topSteps = self.search(pos,position(0,-1),steps, positionsExplored)
-            print("topsteps:", topSteps)
             if totalSteps > topSteps:
                 totalSteps = topSteps
-        print("Do we get here?")
-        input("Press Enter to continue...")
         return totalSteps
-        
-        #return (pos.x, pos.y, steps)
 
 def findPath():
     boardInstance = board()
