@@ -24,6 +24,9 @@ class block:
     def bottomBlocked(self):
         return (self.bottom == 1)
 
+    def isTarget(self):
+        return (self.status == 2)
+
     def __repr__(self):
         return 'left={0}, top={1}, right={2}, bottom={3}, status={4}'.format(self.left, self.top, self.right, self.bottom, self.status)
 
@@ -126,7 +129,7 @@ class board:
                     print("Dead end")
                     return 99999
 
-            if self.board[pos.x][pos.y].status == 2:
+            if self.board[pos.x][pos.y].isTarget():
                 print("found it")
                 input("Press Enter to continue...")
                 return steps
