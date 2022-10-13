@@ -12,6 +12,22 @@ class block:
         self.bottom = bottom
         self.status = status
 
+    def leftBlocked(self):
+        return (self.left == 1)
+
+    def topBlocked(self):
+        return (self.top == 1)
+
+    def rightBlocked(self):
+        return (self.right == 1)
+
+    def bottomBlocked(self):
+        return (self.bottom == 1)
+
+    def __repr__(self):
+        return 'left={0}, top={1}, right={2}, bottom={3}, status={4}'.format(self.left, self.top, self.right, self.bottom, self.status)
+
+
 class position:
     def __init__(self, x, y):
         self.x = x
@@ -29,7 +45,7 @@ class position:
         self.y += offset.y
 
     def __repr__(self):
-        return '{0}, {1}'.format(self.x, self.y)
+        return f'x={self.x}, y={self.y}'
 
 class board:
     board = []
@@ -40,15 +56,15 @@ class board:
         for y in range(len(self.board[0])):
             line = ""
             for x in range(len(self.board)):
-                if self.board[x][y].left == 1:
+                if self.board[x][y].leftBlocked():
                     line += "|"
-                if self.board[x][y].top == 1:
+                if self.board[x][y].topBlocked():
                     line += "^"
-                if self.board[x][y].bottom == 1:
+                if self.board[x][y].bottomBlocked():
                     line += "_"
-                if self.board[x][y].top == 0 and self.board[x][y].bottom == 0:
+                if not self.board[x][y].topBlocked() and not self.board[x][y].bottomBlocked():
                     line += " "
-                if self.board[x][y].right == 1:
+                if self.board[x][y].rightBlocked():
                     line += "|"
                  
             print(line)
@@ -56,12 +72,8 @@ class board:
     # Direction -1 left, 1 right
     # Direction up -1 down, 1 up
     def search(self, startpos, direction=position(0, 0), startSteps = 0, positionsExploredInput = []):
-        print("start(x,y,dx,dy):",startpos.x, startpos.y, direction.x, direction.y)
-        print("Board start:", 
-                self.board[startpos.x][startpos.y].left, 
-                self.board[startpos.x][startpos.y].top,
-                self.board[startpos.x][startpos.y].right,
-                self.board[startpos.x][startpos.y].bottom)
+        print(f"start pos:({startpos}), direction:({direction})")
+        print("block info:", self.board[startpos.x][startpos.y])
         pos = startpos
         positionsExplored = positionsExploredInput
         # X
@@ -70,20 +82,20 @@ class board:
         steps = startSteps
         while canContinue:
             # X
-            if direction.x == 1 and self.board[pos.x][pos.y].right == 0:
+            if direction.x == 1 and not self.board[pos.x][pos.y].rightBlocked():
                 pos.x += 1
                 didMove = True
                 print("x++")
-            elif direction.x == -1 and self.board[pos.x][pos.y].left == 0:
+            elif direction.x == -1 and not self.board[pos.x][pos.y].leftBlocked():
                 pos.x -= 1
                 didMove = True
                 print("x--")
             # Y
-            elif direction.y == 1 and self.board[pos.x][pos.y].bottom == 0:
+            elif direction.y == 1 and not self.board[pos.x][pos.y].bottomBlocked():
                 pos.y += 1
                 didMove = True
                 print("y++")
-            elif direction.y == -1 and self.board[pos.x][pos.y].top == 0:
+            elif direction.y == -1 and not self.board[pos.x][pos.y].topBlocked():
                 pos.y -= 1
                 didMove = True
                 print("y--")
