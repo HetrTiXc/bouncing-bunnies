@@ -1,10 +1,12 @@
-# from flask import Flask
-
-# app = Flask(__name__)
-
-# @app.route("/")
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 class block:
+    left = 0
+    top = 0
+    right = 0
+    bottom = 0
+    status = 0
     def __init__(self, left, top, right, bottom, status):
         self.left = left
         self.top = top
@@ -54,7 +56,6 @@ class board:
     board = []
     def __init__(self):
         self.board = [[block(1,1,0,1,0),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
-
     def printBoard(self):
         for y in range(len(self.board[0])):
             line = ""
@@ -71,6 +72,23 @@ class board:
                     line += "|"
                  
             print(line)
+
+    def boardToJson(self):
+        jsonObj = {
+            "cells": []
+        }
+        for x in range(len(self.board)):
+            for y in range(len(self.board[0])):
+                jsonObj["cells"].append({
+                    "x": x,
+                    "y": y,
+                    "left": self.board[x][y].left,
+                    "top": self.board[x][y].top,
+                    "right": self.board[x][y].right,
+                    "bottom": self.board[x][y].bottom,
+                    "status": self.board[x][y].status
+                })
+        return jsonObj
 
     # Direction -1 left, 1 right
     # Direction up -1 down, 1 up
@@ -141,14 +159,30 @@ class board:
                 totalSteps = topSteps
         return totalSteps
 
+app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/shortestPath")
 def findPath():
     boardInstance = board()
 
     boardInstance.printBoard()
 
-    result = "Shortest path is " + str(boardInstance.search(position(0,0)))
+    result = str(boardInstance.search(position(0,0)))
     return result
 
-if __name__ == "__main__":
-    print(findPath())
-    # app.run(debug=True)
+@app.get("/map")
+def returnMap():
+    return board().boardToJson()
+
+# if __name__ == "__main__":
+#     app.run(debug=True)
+
