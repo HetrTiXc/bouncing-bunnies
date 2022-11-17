@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 class block:
     left = 0
@@ -73,7 +74,7 @@ class board:
                  
             print(line)
 
-    def boardToJson(self):
+    def boardToJson(self, seed):
         jsonObj = {
             "cells": []
         }
@@ -170,8 +171,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/shortestPath")
-def findPath():
+class Request(BaseModel):
+    seed: int
+
+@app.post("/shortestPath")
+async def findPath(request: Request):
     boardInstance = board()
 
     boardInstance.printBoard()
@@ -179,9 +183,9 @@ def findPath():
     result = str(boardInstance.search(position(0,0)))
     return result
 
-@app.get("/map")
-def returnMap():
-    return board().boardToJson()
+@app.post("/map")
+async def returnMap(request: Request):
+    return board().boardToJson(request.seed)
 
 # if __name__ == "__main__":
 #     app.run(debug=True)

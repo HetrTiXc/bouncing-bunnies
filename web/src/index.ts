@@ -39,10 +39,16 @@ interface blockObjects {
 	status: number;
 }
 
-//let board = [[new Block(1,1,0,1,0),new Block(1,1,0,0,0),new Block(1,0,0,1,0)], [new Block(0,1,1,0,0),new Block(0,0,0,0,0),new Block(0,0,0,1,0)], [new Block(1,1,1,0,2),new Block(0,0,1,0,0),new Block(0,0,1,1,0)]]
-
 const fetchBoard = async () => {
-	let response = await fetch('http://localhost:8001/map');
+	let response = await fetch('http://localhost:8001/map', {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/json;charset=UTF-8'
+		},
+		body: JSON.stringify({
+			seed: 1,
+		}),
+	});
 	let data = await response.json();
 	if (response.ok) {
 		return data;
@@ -53,7 +59,15 @@ const fetchBoard = async () => {
 }
 
 const fetchShortestPath = async () => {
-	let response = await fetch('http://localhost:8001/shortestPath');
+	let response = await fetch('http://localhost:8001/shortestPath', {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/json;charset=UTF-8'
+		},
+		body: JSON.stringify({
+			seed: 1,
+		}),
+	});
 	let data = await response.json();
 	if (response.ok) {
 		return data;
