@@ -4,9 +4,11 @@
 Two folders: backend and web
 
 * Install fastapi: ```pip install "fastapi[all]"```
-* Download and install nodejs and run ```npm install```
+* Download and install nodejs and run ```npm install``` in the web folder
 
 ## Run
+
+Open the repo folder in VS code and launch both configs or run both tasks, or run the following in command line
 
 Backend:
 ```uvicorn main:app --app-dir=backend --reload --host 0.0.0.0 --port 8001```
