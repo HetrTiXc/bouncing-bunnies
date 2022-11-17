@@ -6,8 +6,21 @@
 			"script": "start",
 			"path": "web/",
 			"problemMatcher": [],
-			"label": "npm: start - web",
+			"label": "Web",
 			"detail": "webpack serve --mode=development"
-		}
+		},
+		{
+            "label": "Backend",
+            "type": "shell",
+            "command": "uvicorn",
+            "args": [
+                "main:app",
+                "--app-dir=backend",
+                "--reload",
+                "--host", "0.0.0.0",
+                "--port", "8001"
+            ],
+        }
+ 
 	]
 }
