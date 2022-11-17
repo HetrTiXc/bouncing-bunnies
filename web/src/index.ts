@@ -1,4 +1,4 @@
-import { Application, Sprite, Graphics, Text } from 'pixi.js'
+import { Application, Sprite, Graphics, Text, TextStyle } from 'pixi.js'
 
 const app = new Application({
 	view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
@@ -6,7 +6,7 @@ const app = new Application({
 	autoDensity: true,
 	backgroundColor: 0x6495ed,
 	width: 640,
-	height: 480
+	height: 700
 });
 
 class Block {
@@ -92,9 +92,10 @@ fetchBoard().then(result => {
 		const bunny: Sprite = Sprite.from("bunny.png");
 
 		bunny.anchor.set(0.5);
-
-		bunny.x = 100 * x + 50
-		bunny.y = 100 * y + 50
+		let shortestSide = app.screen.width < app.screen.height ? app.screen.width : app.screen.height;
+		let scale = shortestSide/Math.sqrt(parsedJson.cells.length)
+		bunny.x = scale * x + scale/2
+		bunny.y = scale * y + scale/2
 
 		// Opt-in to interactivity
 		bunny.interactive = true;
@@ -115,12 +116,12 @@ fetchBoard().then(result => {
 			let line = new Graphics();
 			let thickness = 4;
 
-			line.position.set(bunny.x - 50, bunny.y - 50);
+			line.position.set(bunny.x - scale/2, bunny.y - scale/2);
 
 			// Draw the line (endPoint should be relative to myGraph's position)
 			line.lineStyle(thickness, 0xffffff)
 				.moveTo(0, 0)
-				.lineTo(0, 100);
+				.lineTo(0, scale);
 			
 			app.stage.addChild(line)
 		}
@@ -129,12 +130,12 @@ fetchBoard().then(result => {
 			let line = new Graphics();
 			let thickness = 4;
 
-			line.position.set(bunny.x - 50, bunny.y - 50);
+			line.position.set(bunny.x - scale/2, bunny.y - scale/2);
 
 			// Draw the line (endPoint should be relative to myGraph's position)
 			line.lineStyle(thickness, 0xffffff)
 				.moveTo(0, 0)
-				.lineTo(100, 0);
+				.lineTo(scale, 0);
 			
 			app.stage.addChild(line)
 		}
@@ -143,12 +144,12 @@ fetchBoard().then(result => {
 			let line = new Graphics();
 			let thickness = 4;
 
-			line.position.set(bunny.x + 50, bunny.y - 50);
+			line.position.set(bunny.x + scale/2, bunny.y - scale/2);
 
 			// Draw the line (endPoint should be relative to myGraph's position)
 			line.lineStyle(thickness, 0xffffff)
 				.moveTo(0, 0)
-				.lineTo(0, 100);
+				.lineTo(0, scale);
 			
 			app.stage.addChild(line)
 		}
@@ -157,12 +158,12 @@ fetchBoard().then(result => {
 			let line = new Graphics();
 			let thickness = 4;
 
-			line.position.set(bunny.x - 50, bunny.y + 50);
+			line.position.set(bunny.x - scale/2, bunny.y + scale/2);
 
 			// Draw the line (endPoint should be relative to myGraph's position)
 			line.lineStyle(thickness, 0xffffff)
 				.moveTo(0, 0)
-				.lineTo(100, 0);
+				.lineTo(scale, 0);
 			
 			app.stage.addChild(line)
 		}
@@ -172,9 +173,16 @@ fetchBoard().then(result => {
 });
 
 fetchShortestPath().then(result => {
-	const basicText = new Text('Shortest path: ' + result);
-	basicText.x = 50;
-	basicText.y = 350;
+	const style = new TextStyle({
+		fontFamily: 'Arial',
+		fontSize: 30,
+		fill: ['#ffffff'], // gradient
+		stroke: '#000000',
+		strokeThickness: 5,
+	});
+	const basicText = new Text('Shortest path: ' + result, style);
+	basicText.x = 10;
+	basicText.y = app.screen.height - 50;
 
 	app.stage.addChild(basicText);
 });
