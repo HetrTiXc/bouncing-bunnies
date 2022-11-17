@@ -8,12 +8,12 @@ Two folders: backend and web
 
 ## Run
 
-Open the repo folder in VS code and launch both configs or run both tasks, or run the following in command line
+Open the repo folder in VS Code and launch both configs or run both tasks, or run the following in command line
 
 Backend:
 ```uvicorn main:app --app-dir=backend --reload --host 0.0.0.0 --port 8001```
 
 Website:
-```npm --prefix ./web/ run start```
+```npm --prefix ./web/ start```
 
 Website will be hosted on [localhost:8000](http://localhost:8000)
