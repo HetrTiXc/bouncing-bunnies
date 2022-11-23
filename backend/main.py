@@ -51,12 +51,15 @@ class position:
         self.y += offset.y
 
     def __repr__(self):
-        return f'x={self.x}, y={self.y}'
+        return f'x={self.x} y={self.y}'
+
+class route:
+    positions: position = []
 
 class board:
     board = []
     def __init__(self):
-        self.board = [[block(1,1,0,1,0),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
+        self.board = [[block(1,1,0,1,1),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
     def printBoard(self):
         for y in range(len(self.board[0])):
             line = ""
@@ -94,10 +97,10 @@ class board:
     # Direction -1 left, 1 right
     # Direction up -1 down, 1 up
 
-    def search(self, startpos, direction=position(0, 0), startSteps = 0, positionsExploredInput = []):
+    def search(self, startpos, direction=position(0, 0), startSteps = 0, positionsExploredInput = [], routesExploredInput = []):
         pos = position(startpos.x, startpos.y)
         positionsExplored = positionsExploredInput[:]
-
+        routesExplored = routesExploredInput[:]
         canContinue = True
         didMove = False
         steps = startSteps
@@ -128,7 +131,7 @@ class board:
 
             for epos in positionsExplored:
                 if epos.equals(pos):
-                    return 99999
+                    return 99999, routesExplored
             
             alreadyAdded = False
             for epos in positionsExplored:
@@ -138,27 +141,29 @@ class board:
                 positionsExplored.append(pos)
 
             if self.board[pos.x][pos.y].isTarget():
-                return steps
+                # print(positionsExplored)
+                routesExplored.append(positionsExplored)
+                return steps, routesExplored
 
         totalSteps = 99999
 
         if direction.x != 1:
-            rightSteps = self.search(pos,position(1,0),steps, positionsExplored)
+            rightSteps, routesExplored = self.search(pos,position(1,0),steps, positionsExplored, routesExplored)
             if totalSteps > rightSteps:
                 totalSteps = rightSteps
         if direction.x != -1:
-            leftSteps = self.search(pos,position(-1,0),steps, positionsExplored)
+            leftSteps, routesExplored = self.search(pos,position(-1,0),steps, positionsExplored, routesExplored)
             if totalSteps > leftSteps:
                 totalSteps = leftSteps
         if direction.y != 1:
-            bottomSteps = self.search(pos,position(0,1),steps, positionsExplored)
+            bottomSteps, routesExplored = self.search(pos,position(0,1),steps, positionsExplored, routesExplored)
             if totalSteps > bottomSteps:
                 totalSteps = bottomSteps
         if direction.y != -1:
-            topSteps = self.search(pos,position(0,-1),steps, positionsExplored)
+            topSteps, routesExplored = self.search(pos,position(0,-1),steps, positionsExplored, routesExplored)
             if totalSteps > topSteps:
                 totalSteps = topSteps
-        return totalSteps
+        return totalSteps, routesExplored
 
 app = FastAPI()
 origins = ["*"]
@@ -180,7 +185,17 @@ async def findPath(request: Request):
 
     boardInstance.printBoard()
 
-    result = str(boardInstance.search(position(0,0)))
+    steps, shortestPaths = boardInstance.search(position(0,0))
+    shortestPath = []
+
+    for path in shortestPaths:
+        print(len(path))
+        if len(path) == steps + 1:
+            shortestPath = path
+    result = {
+        "steps": steps,
+        "shortestPath": shortestPath,
+    }
     return result
 
 @app.post("/map")
