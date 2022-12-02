@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import csv
 
 class block:
     left = 0
@@ -8,12 +9,26 @@ class block:
     right = 0
     bottom = 0
     status = 0
-    def __init__(self, left, top, right, bottom, status):
-        self.left = left
-        self.top = top
-        self.right = right
-        self.bottom = bottom
-        self.status = status
+    # def __init__(self, left, top, right, bottom, status):
+    #     self.left = left
+    #     self.top = top
+    #     self.right = right
+    #     self.bottom = bottom
+    #     self.status = status
+
+    def __init__(self, properties):
+        if 'L' in properties:
+            self.left = 1
+        if 'T' in properties:
+            self.top = 1
+        if 'R' in properties:
+            self.right = 1
+        if 'B' in properties:
+            self.bottom = 1
+        if 'S' in properties:
+            self.status = 1
+        if 'G' in properties:
+            self.status = 2
 
     def leftBlocked(self):
         return (self.left == 1)
@@ -31,7 +46,7 @@ class block:
         return (self.status == 2)
 
     def __repr__(self):
-        return 'left={0}, top={1}, right={2}, bottom={3}, status={4}'.format(self.left, self.top, self.right, self.bottom, self.status)
+        return 'left={0}, top={1}, right={2}, bottom={3}, status={4} §'.format(self.left, self.top, self.right, self.bottom, self.status)
 
 
 class position:
@@ -58,8 +73,41 @@ class route:
 
 class board:
     board = []
+    # def __init__(self):
+    #     self.board = [[block(1,1,0,1,1),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
     def __init__(self):
-        self.board = [[block(1,1,0,1,1),block(1,1,0,0,0),block(1,0,0,1,0)], [block(0,1,1,0,0),block(0,0,0,0,0),block(0,0,0,1,0)], [block(1,1,1,0,2),block(0,0,1,0,0),block(0,0,1,1,0)]]
+        self.board = []
+        with open('backend/maps/15x15test1.csv', newline='') as csvfile:
+            boardReader = csv.reader(csvfile, delimiter=',')
+            for row in boardReader:
+                boardRow = []
+                for singleBlock in row:
+                    boardRow.append(block(singleBlock))
+                self.board.append(boardRow)
+
+        # Invert x and y
+        height = len(self.board)
+        width = len(self.board[0])
+        board = []
+        for y in range(height):
+            row = []
+            for x in range(width):
+                row.append(self.board[x][y])
+            board.append(row)
+        
+        self.board = board[:]
+
+        for x in range(width):
+            for y in range(height):
+                if self.board[x][y].left == 1 and x != 0:
+                    self.board[x - 1][y].right = 1
+                if self.board[x][y].right == 1 and x != width - 1:
+                    self.board[x + 1][y].left = 1
+                if self.board[x][y].top == 1 and y != 0:
+                    self.board[x][y - 1].bottom = 1
+                if self.board[x][y].bottom == 1 and y != height - 1:
+                    self.board[x][y + 1].top = 1
+
     def printBoard(self):
         for y in range(len(self.board[0])):
             line = ""
@@ -79,7 +127,9 @@ class board:
 
     def boardToJson(self, seed):
         jsonObj = {
-            "cells": []
+            "cells": [],
+            "width": len(self.board),
+            "height": len(self.board[0]),
         }
         for x in range(len(self.board)):
             for y in range(len(self.board[0])):
@@ -183,18 +233,17 @@ class Request(BaseModel):
 async def findPath(request: Request):
     boardInstance = board()
 
-    boardInstance.printBoard()
-
     steps, shortestPaths = boardInstance.search(position(0,0))
     shortestPath = []
 
     for path in shortestPaths:
-        print(len(path))
         if len(path) == steps + 1:
             shortestPath = path
     result = {
         "steps": steps,
         "shortestPath": shortestPath,
+        "width": len(boardInstance.board),
+        "height": len(boardInstance.board[0]),
     }
     return result
 
